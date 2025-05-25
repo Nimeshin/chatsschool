@@ -78,11 +78,15 @@ function get_db_connection(): PDO
 function url_path(string $path): string
 {
     // Get base URL - handles both localhost and production domain
-    $base_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . $_SERVER['HTTP_HOST'];
+    $is_secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || 
+                 (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443) ||
+                 (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https');
+    
+    $base_url = ($is_secure ? "https" : "http") . "://" . $_SERVER['HTTP_HOST'];
     
     // Add directory path if on localhost/subdirectory
     $script_name = dirname($_SERVER['SCRIPT_NAME']);
-    $base_path = $script_name !== '/' ? $script_name : '';
+    $base_path = ($script_name !== '/' && $script_name !== '\\') ? $script_name : '';
     
     // Remove .php extension for internal links
     if (strpos($path, '.php') !== false) {
