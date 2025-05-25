@@ -13,11 +13,16 @@ RewriteCond %{HTTP_HOST} !^www\. [NC]
 RewriteCond %{HTTP_HOST} !^localhost [NC]
 RewriteRule ^(.*)$ https://www.%{HTTP_HOST}/$1 [R=301,L]
 
+# Remove trailing slashes (except for directories)
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} (.+)/$
+RewriteRule ^(.+)/$ /$1 [R=301,L]
+
 # Allow direct access to certain directories/files
 RewriteCond %{REQUEST_URI} !^/assets/
 RewriteCond %{REQUEST_URI} !^/error/
 RewriteCond %{REQUEST_URI} !^/includes/
-RewriteCond %{REQUEST_URI} !\.(css|js|jpg|jpeg|png|gif|ico|pdf|svg|woff|woff2|ttf|eot)$
+RewriteCond %{REQUEST_URI} !\.(css|js|jpg|jpeg|png|gif|ico|pdf|svg|woff|woff2|ttf|eot|xml|txt)$
 
 # Clean URLs - Remove PHP extension
 RewriteCond %{REQUEST_FILENAME} !-d
@@ -33,6 +38,10 @@ RewriteRule ^(.*)$ $1.php [L]
 # Handle index.php requests
 RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /index\.php\ HTTP/
 RewriteRule ^index\.php$ / [R=301,L]
+
+# Redirect common variations to canonical URLs
+RewriteRule ^home/?$ / [R=301,L]
+RewriteRule ^index/?$ / [R=301,L]
 
 # Default index page
 DirectoryIndex index.php index.html
@@ -60,15 +69,22 @@ AddType application/x-font-opentype .otf
 AddType application/x-font-woff .woff
 AddType application/x-font-woff2 .woff2
 AddType image/svg+xml .svg
+AddType application/xml .xml
+AddType text/plain .txt
 
 # Prevent directory listing
 Options -Indexes
 
-# Prevent access to specific files
-<FilesMatch "^(\.htaccess|\.git|\.env|config\.php)">
+# Prevent access to specific files and directories
+<FilesMatch "^(\.htaccess|\.git|\.env|config\.php|composer\.(json|lock)|package\.json)">
     Order Allow,Deny
     Deny from all
 </FilesMatch>
+
+# Block access to sensitive directories
+<IfModule mod_rewrite.c>
+    RewriteRule ^(includes|error|Website\ Uploads|documents|\.git)/ - [F,L]
+</IfModule>
 
 # Enable browser caching
 <IfModule mod_expires.c>
@@ -84,6 +100,9 @@ Options -Indexes
     ExpiresByType application/x-javascript "access plus 1 month"
     ExpiresByType application/pdf "access plus 1 month"
     ExpiresByType application/x-shockwave-flash "access plus 1 month"
+    ExpiresByType application/xml "access plus 1 week"
+    ExpiresByType text/xml "access plus 1 week"
+    ExpiresByType text/plain "access plus 1 week"
     ExpiresDefault "access plus 2 days"
 </IfModule>
 
@@ -101,6 +120,7 @@ Options -Indexes
     Header set X-Content-Type-Options "nosniff"
     Header set X-Frame-Options "SAMEORIGIN"
     Header set Referrer-Policy "strict-origin-when-cross-origin"
+    Header set Permissions-Policy "geolocation=(), microphone=(), camera=()"
     
     # Add Cache-Control for HTML files
     <FilesMatch "\.(html|php)$">
@@ -108,7 +128,12 @@ Options -Indexes
     </FilesMatch>
     
     # Cache static assets
-    <FilesMatch "\.(css|js|jpg|jpeg|png|gif|ico|svg)$">
+    <FilesMatch "\.(css|js|jpg|jpeg|png|gif|ico|svg|woff|woff2|ttf|eot)$">
         Header set Cache-Control "max-age=31536000, public"
+    </FilesMatch>
+    
+    # Cache XML and text files
+    <FilesMatch "\.(xml|txt)$">
+        Header set Cache-Control "max-age=604800, public"
     </FilesMatch>
 </IfModule> 

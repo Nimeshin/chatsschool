@@ -1,0 +1,25 @@
+User-agent: *
+Allow: /
+
+# Allow access to CSS and JS files
+Allow: /assets/css/
+Allow: /assets/js/
+Allow: /assets/images/
+
+# Disallow access to sensitive directories
+Disallow: /includes/
+Disallow: /error/
+Disallow: /Website Uploads/
+Disallow: /documents/
+Disallow: /.git/
+
+# Disallow test and temporary files
+Disallow: /test-url-path.php
+Disallow: /enable-rewrite.php
+Disallow: /update-links.php
+Disallow: /server-error.php
+Disallow: /not-found.php
+Disallow: /*.zip$
+
+# Sitemap location
+Sitemap: https://www.saischoolchats.co.za/sitemap.xml 

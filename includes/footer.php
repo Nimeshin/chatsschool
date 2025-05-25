@@ -16,5 +16,12 @@ require_once ROOT_PATH . 'includes/classes/Footer.php';
 
 use SathyaSaiSchool\Footer;
 
+// Close main content
+echo '</main>';
+
 $footer = new Footer();
-echo $footer->render(); 
+echo $footer->render();
+?>
+
+</body>
+</html> 
