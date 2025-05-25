@@ -2,13 +2,15 @@
 declare(strict_types=1);
 
 /**
- * Contact Form Handler
+ * Contact Form Handler with PHPMailer
  * 
  * @package SathyaSaiSchool
  */
 
 // Include configuration
 require_once 'config.php';
+
+use SathyaSaiSchool\MailService;
 
 // Set proper headers first
 header('Content-Type: application/json');
@@ -50,86 +52,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception('Please enter a more detailed message (at least 10 characters).');
         }
 
-        // Log the contact form submission
-        $log_entry = [
-            'timestamp' => date('Y-m-d H:i:s'),
+        // Prepare data array
+        $contact_data = [
             'name' => $name,
             'email' => $email,
             'phone' => $phone,
             'subject' => $subject,
             'message' => $message,
-            'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown'
+            'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown',
+            'timestamp' => date('Y-m-d H:i:s')
         ];
 
-        // Try to save to a log file
+        // Log the contact form submission
         $log_file = ROOT_PATH . 'contact_submissions.log';
-        $log_line = json_encode($log_entry) . "\n";
+        $log_line = json_encode($contact_data) . "\n";
         file_put_contents($log_file, $log_line, FILE_APPEND | LOCK_EX);
 
-        // Try to send email if mail function is available
+        // Try to send email using PHPMailer
         $email_sent = false;
-        if (function_exists('mail')) {
-            try {
-                // Prepare email content
-                $to = ADMIN_EMAIL;
-                $email_subject = "New Contact Form Submission: " . $subject;
-                
-                $email_body = "You have received a new message from the contact form.\n\n";
-                $email_body .= "Name: " . $name . "\n";
-                $email_body .= "Email: " . $email . "\n";
-                if (!empty($phone)) {
-                    $email_body .= "Phone: " . $phone . "\n";
-                }
-                $email_body .= "Subject: " . $subject . "\n\n";
-                $email_body .= "Message:\n" . $message . "\n\n";
-                $email_body .= "Submitted on: " . date('Y-m-d H:i:s') . "\n";
-                $email_body .= "IP Address: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
-
-                // Basic email headers
-                $headers = [];
-                $headers[] = "From: " . SITE_NAME . " <noreply@saischoolchats.co.za>";
-                $headers[] = "Reply-To: " . $email;
-                $headers[] = "Content-Type: text/plain; charset=UTF-8";
-                $headers[] = "MIME-Version: 1.0";
-                $headers[] = "X-Mailer: PHP/" . phpversion();
-
-                // Send email
-                $email_sent = mail($to, $email_subject, $email_body, implode("\r\n", $headers));
-
-                // Send auto-reply if main email was sent successfully
-                if ($email_sent) {
-                    $auto_reply_subject = "Thank you for contacting " . SITE_NAME;
-                    $auto_reply_message = "Dear " . $name . ",\n\n";
-                    $auto_reply_message .= "Thank you for contacting us. We have received your message and will respond as soon as possible.\n\n";
-                    $auto_reply_message .= "Your message:\n";
-                    $auto_reply_message .= "Subject: " . $subject . "\n";
-                    $auto_reply_message .= "Message: " . $message . "\n\n";
-                    $auto_reply_message .= "Best regards,\n";
-                    $auto_reply_message .= SITE_NAME . " Team";
-
-                    // Auto-reply headers
-                    $auto_headers = [];
-                    $auto_headers[] = "From: " . SITE_NAME . " <noreply@saischoolchats.co.za>";
-                    $auto_headers[] = "Reply-To: " . ADMIN_EMAIL;
-                    $auto_headers[] = "Content-Type: text/plain; charset=UTF-8";
-                    $auto_headers[] = "MIME-Version: 1.0";
-                    $auto_headers[] = "X-Mailer: PHP/" . phpversion();
-
-                    // Send auto-reply
-                    mail($email, $auto_reply_subject, $auto_reply_message, implode("\r\n", $auto_headers));
-                }
-            } catch (Exception $mail_error) {
-                error_log('Contact Form Mail Error: ' . $mail_error->getMessage());
-                // Don't throw exception here, just log it
+        $auto_reply_sent = false;
+        
+        try {
+            $mailService = new MailService();
+            
+            // Send main contact email
+            $email_sent = $mailService->sendContactForm($contact_data);
+            
+            // Send auto-reply if main email was successful
+            if ($email_sent) {
+                $auto_reply_sent = $mailService->sendAutoReply($contact_data);
             }
+            
+        } catch (Exception $mail_error) {
+            error_log('PHPMailer Error: ' . $mail_error->getMessage());
+            // Don't throw exception here, just log it
         }
 
-        // Success response regardless of email status
+        // Success response with appropriate message
         $response['success'] = true;
+        
         if ($email_sent) {
-            $response['message'] = 'Thank you for your message. We have received it and will get back to you soon.';
+            if ($auto_reply_sent) {
+                $response['message'] = 'Thank you for your message! We have received it and sent you a confirmation email. We will get back to you soon.';
+            } else {
+                $response['message'] = 'Thank you for your message! We have received it and will get back to you soon.';
+            }
         } else {
-            $response['message'] = 'Thank you for your message. We have received it and will contact you soon. If urgent, please call us directly at 031 402 1740.';
+            $response['message'] = 'Thank you for your message! We have received it and will contact you soon. If urgent, please call us directly at 031 402 1740.';
         }
 
     } catch (Exception $e) {

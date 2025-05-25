@@ -22,6 +22,8 @@ Disallow: /not-found.php
 Disallow: /*.zip$
 Disallow: /*.log$
 Disallow: /contact_submissions.log
+Disallow: /test-*.php
+Disallow: /vendor/
 
 # Sitemap location
 Sitemap: https://www.saischoolchats.co.za/sitemap.xml 

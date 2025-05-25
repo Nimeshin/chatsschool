@@ -31,4 +31,11 @@ tmp/
 
 # Upload directories (if they contain user uploads)
 uploads/
-user_uploads/ 
+user_uploads/
+
+# Composer
+vendor/
+composer.lock
+
+# Test files (remove after testing)
+test-*.php 

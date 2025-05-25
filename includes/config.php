@@ -37,6 +37,12 @@ define('ROOT_PATH', dirname(__DIR__) . DIRECTORY_SEPARATOR);
 define('INCLUDES_PATH', ROOT_PATH . 'includes' . DIRECTORY_SEPARATOR);
 define('ASSETS_PATH', ROOT_PATH . 'assets' . DIRECTORY_SEPARATOR);
 
+// Load Composer autoloader
+require_once ROOT_PATH . 'vendor/autoload.php';
+
+// Load mail configuration
+require_once INCLUDES_PATH . 'mail_config.php';
+
 // Load essential functions
 require_once INCLUDES_PATH . 'functions.php';
 
