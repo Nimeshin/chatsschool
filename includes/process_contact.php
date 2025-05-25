@@ -68,31 +68,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $log_line = json_encode($contact_data) . "\n";
         file_put_contents($log_file, $log_line, FILE_APPEND | LOCK_EX);
 
-        // Try to send email using PHPMailer or fallback to basic mail()
+        // Try to send email using PHPMailer
         $email_sent = false;
         $auto_reply_sent = false;
         
-        if (defined('PHPMAILER_AVAILABLE') && PHPMAILER_AVAILABLE) {
-            // Use PHPMailer if available
-            try {
-                $mailService = new MailService();
-                
-                // Send main contact email
-                $email_sent = $mailService->sendContactForm($contact_data);
-                
-                // Send auto-reply if main email was successful
-                if ($email_sent) {
-                    $auto_reply_sent = $mailService->sendAutoReply($contact_data);
-                }
-                
-            } catch (Exception $mail_error) {
-                error_log('PHPMailer Error: ' . $mail_error->getMessage());
-                // Fall back to basic mail() function
-                $email_sent = send_basic_email($contact_data);
+        try {
+            $mailService = new MailService();
+            
+            // Send main contact email
+            $email_sent = $mailService->sendContactForm($contact_data);
+            
+            // Send auto-reply if main email was successful
+            if ($email_sent) {
+                $auto_reply_sent = $mailService->sendAutoReply($contact_data);
             }
-        } else {
-            // Use basic PHP mail() function as fallback
-            $email_sent = send_basic_email($contact_data);
+            
+        } catch (Exception $mail_error) {
+            error_log('PHPMailer Error: ' . $mail_error->getMessage());
+            // Don't throw exception here, just log it
         }
 
         // Success response with appropriate message

@@ -37,22 +37,11 @@ define('ROOT_PATH', dirname(__DIR__) . DIRECTORY_SEPARATOR);
 define('INCLUDES_PATH', ROOT_PATH . 'includes' . DIRECTORY_SEPARATOR);
 define('ASSETS_PATH', ROOT_PATH . 'assets' . DIRECTORY_SEPARATOR);
 
-// Load Composer autoloader (if available)
-$autoloader_path = ROOT_PATH . 'vendor/autoload.php';
-if (file_exists($autoloader_path)) {
-    require_once $autoloader_path;
-    define('PHPMAILER_AVAILABLE', true);
-    
-    // Load mail configuration only if PHPMailer is available
-    require_once INCLUDES_PATH . 'mail_config.php';
-} else {
-    define('PHPMAILER_AVAILABLE', false);
-    
-    // Define basic mail constants for fallback
-    define('MAIL_FROM_EMAIL', 'noreply@saischoolchats.co.za');
-    define('MAIL_FROM_NAME', SITE_NAME);
-    define('MAIL_REPLY_TO', ADMIN_EMAIL);
-}
+// Load Composer autoloader
+require_once ROOT_PATH . 'vendor/autoload.php';
+
+// Load mail configuration
+require_once INCLUDES_PATH . 'mail_config.php';
 
 // Load essential functions
 require_once INCLUDES_PATH . 'functions.php';
