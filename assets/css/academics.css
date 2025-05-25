@@ -1,0 +1,120 @@
+/* Academics Page Styles */
+.academics-page {
+    font-family: 'Open Sans', sans-serif;
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    padding: 4rem 0;
+    margin-bottom: 2rem;
+}
+
+.hero-section h1 {
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+/* Phase Cards */
+.phase-card {
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.phase-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.phase-card h3 {
+    color: #1e3c72;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.phase-content ul {
+    padding-left: 1.2rem;
+    margin-top: 1rem;
+}
+
+.phase-content li {
+    margin-bottom: 0.5rem;
+    color: #495057;
+}
+
+/* Sidebar Styles */
+.academic-sidebar .card {
+    border-radius: 8px;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    margin-bottom: 1.5rem;
+}
+
+.academic-sidebar .card-body {
+    padding: 1.5rem;
+}
+
+.academic-sidebar h3 {
+    color: #1e3c72;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.academic-sidebar ul.list-unstyled li {
+    margin-bottom: 0.75rem;
+}
+
+.academic-sidebar a {
+    color: #2a5298;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.academic-sidebar a:hover {
+    color: #1e3c72;
+    text-decoration: underline;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 991.98px) {
+    .academic-sidebar {
+        margin-top: 2rem;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .hero-section {
+        padding: 3rem 0;
+    }
+    
+    .phase-card {
+        padding: 1rem;
+    }
+}
+
+/* Animations */
+.phase-card {
+    opacity: 0;
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Apply animation delay to cards */
+.phase-card:nth-child(1) { animation-delay: 0.1s; }
+.phase-card:nth-child(2) { animation-delay: 0.2s; }
+.phase-card:nth-child(3) { animation-delay: 0.3s; }
+.phase-card:nth-child(4) { animation-delay: 0.4s; } 
