@@ -153,4 +153,53 @@ function get_flash_message(): ?array
     $message = $_SESSION['flash_message'] ?? null;
     unset($_SESSION['flash_message']);
     return $message;
+}
+
+/**
+ * Send email using basic PHP mail() function (fallback)
+ *
+ * @param array $contact_data
+ * @return bool
+ */
+function send_basic_email(array $contact_data): bool
+{
+    try {
+        // Prepare email content
+        $to = ADMIN_EMAIL;
+        $subject = 'New Contact Form Submission: ' . $contact_data['subject'];
+        
+        $message = "You have received a new message from the contact form.\n\n";
+        $message .= "Name: " . $contact_data['name'] . "\n";
+        $message .= "Email: " . $contact_data['email'] . "\n";
+        if (!empty($contact_data['phone'])) {
+            $message .= "Phone: " . $contact_data['phone'] . "\n";
+        }
+        $message .= "Subject: " . $contact_data['subject'] . "\n\n";
+        $message .= "Message:\n" . $contact_data['message'] . "\n\n";
+        $message .= "Submitted on: " . $contact_data['timestamp'] . "\n";
+        $message .= "IP Address: " . $contact_data['ip'];
+        
+        // Prepare headers
+        $headers = [
+            'From: ' . MAIL_FROM_NAME . ' <' . MAIL_FROM_EMAIL . '>',
+            'Reply-To: ' . $contact_data['name'] . ' <' . $contact_data['email'] . '>',
+            'X-Mailer: PHP/' . phpversion(),
+            'Content-Type: text/plain; charset=UTF-8'
+        ];
+        
+        // Send email
+        $result = mail($to, $subject, $message, implode("\r\n", $headers));
+        
+        if ($result) {
+            error_log('Contact form email sent successfully using mail() function');
+        } else {
+            error_log('Failed to send contact form email using mail() function');
+        }
+        
+        return $result;
+        
+    } catch (Exception $e) {
+        error_log('Basic mail function error: ' . $e->getMessage());
+        return false;
+    }
 } 

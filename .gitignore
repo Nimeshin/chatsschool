@@ -38,4 +38,5 @@ vendor/
 composer.lock
 
 # Test files (remove after testing)
-test-*.php 
+test-*.php
+server-diagnostic.php 
