@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const formData = new FormData(form);
 
         // Send AJAX request
-        fetch('<?= SITE_URL ?>/includes/process_contact.php', {
+        fetch('includes/process_contact.php', {
             method: 'POST',
             body: formData,
             headers: {

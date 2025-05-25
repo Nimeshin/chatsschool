@@ -1,0 +1,34 @@
+# Log files
+*.log
+contact_submissions.log
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+
+# Backup files
+*.bak
+*.backup
+
+# Cache files
+cache/
+tmp/
+
+# Upload directories (if they contain user uploads)
+uploads/
+user_uploads/ 

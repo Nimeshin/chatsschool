@@ -20,6 +20,8 @@ Disallow: /update-links.php
 Disallow: /server-error.php
 Disallow: /not-found.php
 Disallow: /*.zip$
+Disallow: /*.log$
+Disallow: /contact_submissions.log
 
 # Sitemap location
 Sitemap: https://www.saischoolchats.co.za/sitemap.xml 
