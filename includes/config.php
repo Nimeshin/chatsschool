@@ -8,9 +8,9 @@ declare(strict_types=1);
  * @package SathyaSaiSchool
  */
 
-// Error reporting - set to '0' in production
-ini_set('display_errors', '1');
-error_reporting(E_ALL);
+// Error reporting - disabled in production
+ini_set('display_errors', '0');
+error_reporting(0);
 
 // Session configuration - MUST be set before session_start()
 ini_set('session.cookie_httponly', '1');

@@ -1,6 +1,9 @@
 <?php
 declare(strict_types=1);
 
+// Start output buffering
+ob_start();
+
 /**
  * Contact Form Handler with PHPMailer
  * 

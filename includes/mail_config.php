@@ -20,7 +20,7 @@ define('MAIL_FROM_NAME', SITE_NAME);
 define('MAIL_REPLY_TO', ADMIN_EMAIL);
 
 // Mail debugging (set to 0 in production)
-define('MAIL_DEBUG', 2); // Temporarily set to 2 for debugging
+define('MAIL_DEBUG', 0); // Debug output disabled in production
 
 // Alternative configuration for different local setups
 // Uncomment and modify as needed based on your server configuration
