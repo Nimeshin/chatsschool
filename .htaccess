@@ -46,22 +46,23 @@ RewriteRule ^index/?$ / [R=301,L]
 # Default index page
 DirectoryIndex index.php index.html
 
-# PHP settings
-<IfModule mod_php.c>
-    php_value upload_max_filesize 64M
-    php_value post_max_size 64M
-    php_value max_execution_time 300
-    php_value max_input_time 300
-    php_flag display_errors Off
-    php_flag log_errors On
-    php_value error_log logs/php_errors.log
-</IfModule>
+# Basic PHP settings
+php_value upload_max_filesize 64M
+php_value post_max_size 64M
+php_value max_execution_time 300
+php_value max_input_time 300
 
-# Error documents
+# Basic error documents
 ErrorDocument 404 /error/404.php
 ErrorDocument 500 /error/500.php
 ErrorDocument 403 /error/403.php
-ErrorDocument 400 /error/404.php
+
+# Prevent directory listing
+Options -Indexes
+
+# Basic security headers
+Header set X-Content-Type-Options "nosniff"
+Header set X-Frame-Options "SAMEORIGIN"
 
 # MIME types
 AddType application/vnd.ms-fontobject .eot
@@ -75,9 +76,6 @@ AddType text/plain .txt
 AddType application/json .json
 AddType text/css .css
 AddType text/javascript .js
-
-# Prevent directory listing
-Options -Indexes
 
 # Prevent access to specific files and directories
 <FilesMatch "^(\.htaccess|\.git|\.env|config\.php|composer\.(json|lock)|package\.json)">
