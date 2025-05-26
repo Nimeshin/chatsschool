@@ -10,6 +10,10 @@ ob_start();
  * @package SathyaSaiSchool
  */
 
+// Enable error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', '1');
+
 // Include configuration
 require_once 'config.php';
 
@@ -25,12 +29,21 @@ $response = [
     'message' => ''
 ];
 
+// Debug: Log request method and data
+error_log('Request Method: ' . $_SERVER['REQUEST_METHOD']);
+error_log('POST Data: ' . print_r($_POST, true));
+error_log('Session Data: ' . print_r($_SESSION, true));
+
 // Check if it's a POST request
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
+        // Debug: Check CSRF token
+        error_log('Received CSRF Token: ' . ($_POST['csrf_token'] ?? 'not set'));
+        error_log('Session CSRF Token: ' . ($_SESSION['csrf_token'] ?? 'not set'));
+        
         // Verify CSRF token
         if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
-            throw new Exception('Invalid request. Please try again.');
+            throw new Exception('Invalid request. Please try again. (CSRF validation failed)');
         }
 
         // Sanitize and validate input
@@ -39,6 +52,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $phone = trim(filter_input(INPUT_POST, 'phone', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? '');
         $subject = trim(filter_input(INPUT_POST, 'subject', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? '');
         $message = trim(filter_input(INPUT_POST, 'message', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? '');
+
+        // Debug: Log sanitized input
+        error_log('Sanitized Input:');
+        error_log("Name: $name");
+        error_log("Email: $email");
+        error_log("Phone: $phone");
+        error_log("Subject: $subject");
+        error_log("Message: $message");
 
         // Validate required fields
         if (empty($name) || empty($email) || empty($subject) || empty($message)) {
@@ -66,6 +87,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'timestamp' => date('Y-m-d H:i:s')
         ];
 
+        // Debug: Log contact data
+        error_log('Contact Data: ' . print_r($contact_data, true));
+
         // Log the contact form submission
         $log_file = ROOT_PATH . 'contact_submissions.log';
         $log_line = json_encode($contact_data) . "\n";
@@ -78,12 +102,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $mailService = new MailService();
             
+            // Debug: Log mail service initialization
+            error_log('Mail service initialized');
+            
             // Send main contact email
             $email_sent = $mailService->sendContactForm($contact_data);
+            error_log('Main email sent: ' . ($email_sent ? 'true' : 'false'));
             
             // Send auto-reply if main email was successful
             if ($email_sent) {
                 $auto_reply_sent = $mailService->sendAutoReply($contact_data);
+                error_log('Auto-reply sent: ' . ($auto_reply_sent ? 'true' : 'false'));
             }
             
         } catch (Exception $mail_error) {
@@ -111,6 +140,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 } else {
     $response['message'] = 'Invalid request method.';
 }
+
+// Debug: Log final response
+error_log('Final Response: ' . print_r($response, true));
 
 // Ensure clean output
 if (ob_get_length()) ob_clean();

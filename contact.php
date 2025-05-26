@@ -165,8 +165,14 @@ document.addEventListener('DOMContentLoaded', function() {
         successAlert.classList.add('d-none');
         errorAlert.classList.add('d-none');
 
+        // Debug: Log form data
+        console.log('Form submission started');
+        const formData = new FormData(form);
+        console.log('CSRF Token:', formData.get('csrf_token'));
+        
         // Check form validity
         if (!form.checkValidity()) {
+            console.log('Form validation failed');
             e.stopPropagation();
             form.classList.add('was-validated');
             return;
@@ -176,8 +182,8 @@ document.addEventListener('DOMContentLoaded', function() {
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Sending...';
 
-        // Collect form data
-        const formData = new FormData(form);
+        // Debug: Log the request
+        console.log('Sending AJAX request to:', 'includes/process_contact.php');
 
         // Send AJAX request
         fetch('includes/process_contact.php', {
@@ -187,8 +193,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 'Accept': 'application/json'
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            console.log('Response status:', response.status);
+            return response.json();
+        })
         .then(data => {
+            console.log('Server response:', data);
+            
             if (data.success) {
                 // Show success message
                 successAlert.textContent = data.message || 'Thank you for your message. We will get back to you soon.';
