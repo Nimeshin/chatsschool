@@ -91,9 +91,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         error_log('Contact Data: ' . print_r($contact_data, true));
 
         // Log the contact form submission
-        $log_file = ROOT_PATH . 'contact_submissions.log';
-        $log_line = json_encode($contact_data) . "\n";
-        file_put_contents($log_file, $log_line, FILE_APPEND | LOCK_EX);
+        try {
+            // Use the logs directory instead of root
+            $log_dir = dirname(dirname(__FILE__)) . '/logs';
+            if (!is_dir($log_dir)) {
+                mkdir($log_dir, 0755, true);
+            }
+            $log_file = $log_dir . '/contact_submissions.log';
+            
+            // Check if file exists and is writable, or can be created
+            if ((!file_exists($log_file) && is_writable($log_dir)) || is_writable($log_file)) {
+                $log_line = json_encode($contact_data) . "\n";
+                if (file_put_contents($log_file, $log_line, FILE_APPEND | LOCK_EX) === false) {
+                    error_log('Failed to write to log file: ' . $log_file);
+                }
+            } else {
+                error_log('Log file is not writable: ' . $log_file);
+            }
+        } catch (Exception $log_error) {
+            error_log('Error writing to log file: ' . $log_error->getMessage());
+        }
 
         // Try to send email using PHPMailer
         $email_sent = false;

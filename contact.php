@@ -191,10 +191,17 @@ document.addEventListener('DOMContentLoaded', function() {
             body: formData,
             headers: {
                 'Accept': 'application/json'
-            }
+            },
+            credentials: 'same-origin' // Include cookies for CSRF
         })
         .then(response => {
             console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers);
+            
+            // Check if response is ok (status in 200-299 range)
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
             return response.json();
         })
         .then(data => {
@@ -222,7 +229,12 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             console.error('Error:', error);
-            errorAlert.textContent = 'An error occurred. Please try again later.';
+            // Check if it's a network error
+            if (!navigator.onLine) {
+                errorAlert.textContent = 'Network error. Please check your internet connection and try again.';
+            } else {
+                errorAlert.textContent = 'An error occurred while processing your request. Please try again later.';
+            }
             errorAlert.classList.remove('d-none');
         })
         .finally(() => {

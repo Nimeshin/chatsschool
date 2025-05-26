@@ -54,6 +54,8 @@ DirectoryIndex index.php index.html
     php_value max_input_time 300
     php_flag display_errors Off
     php_flag log_errors On
+    php_value error_reporting E_ALL
+    php_value error_log logs/php_errors.log
 </IfModule>
 
 # Error documents
@@ -71,6 +73,9 @@ AddType application/x-font-woff2 .woff2
 AddType image/svg+xml .svg
 AddType application/xml .xml
 AddType text/plain .txt
+AddType application/json .json
+AddType text/css .css
+AddType text/javascript .js
 
 # Prevent directory listing
 Options -Indexes
@@ -136,4 +141,33 @@ Options -Indexes
     <FilesMatch "\.(xml|txt)$">
         Header set Cache-Control "max-age=604800, public"
     </FilesMatch>
-</IfModule> 
+
+    # Allow AJAX requests from same origin
+    Header set Access-Control-Allow-Origin "https://www.saischoolchats.co.za"
+    Header set Access-Control-Allow-Methods "POST, GET, OPTIONS"
+    Header set Access-Control-Allow-Headers "Content-Type"
+    Header set Access-Control-Allow-Credentials "true"
+</IfModule>
+
+# Enable PHP execution
+AddHandler application/x-httpd-php .php
+
+# Protect sensitive files
+<FilesMatch "^(\.htaccess|\.htpasswd|\.git|\.env|composer\.(json|lock))$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Protect includes directory
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^includes/ - [F,L]
+</IfModule>
+
+# Set directory permissions
+<Directory "/logs">
+    Options -Indexes
+    Order allow,deny
+    Allow from all
+    Require all granted
+</Directory> 
