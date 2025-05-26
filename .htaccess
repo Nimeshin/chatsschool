@@ -47,21 +47,20 @@ RewriteRule ^index/?$ / [R=301,L]
 DirectoryIndex index.php index.html
 
 # PHP settings
-<IfModule mod_php7.c>
+<IfModule mod_php.c>
     php_value upload_max_filesize 64M
     php_value post_max_size 64M
     php_value max_execution_time 300
     php_value max_input_time 300
     php_flag display_errors Off
     php_flag log_errors On
-    php_value error_reporting E_ALL
     php_value error_log logs/php_errors.log
 </IfModule>
 
 # Error documents
 ErrorDocument 404 /error/404.php
 ErrorDocument 500 /error/500.php
-ErrorDocument 403 /error/404.php
+ErrorDocument 403 /error/403.php
 ErrorDocument 400 /error/404.php
 
 # MIME types
@@ -115,7 +114,7 @@ Options -Indexes
 <IfModule mod_deflate.c>
     AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript
     AddOutputFilterByType DEFLATE application/javascript application/x-javascript application/json
-    AddOutputFilterByType DEFLATE application/xml application/xhtml+xml application/rss+xml
+    AddOutputFilterByType DEFLATE application/xml application/xhtml+xml
     AddOutputFilterByType DEFLATE image/svg+xml
 </IfModule>
 
@@ -168,6 +167,13 @@ AddHandler application/x-httpd-php .php
 <Directory "/logs">
     Options -Indexes
     Order allow,deny
+    Allow from all
+    Require all granted
+</Directory>
+
+# Allow access to includes directory for AJAX requests
+<Directory "/includes">
+    Order Allow,Deny
     Allow from all
     Require all granted
 </Directory> 
