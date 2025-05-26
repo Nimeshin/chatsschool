@@ -8,19 +8,19 @@ declare(strict_types=1);
  */
 
 // Mail server configuration
-define('MAIL_HOST', 'localhost'); // Local mail server
-define('MAIL_PORT', 25); // Standard SMTP port for local server
-define('MAIL_USERNAME', ''); // Usually empty for local server
-define('MAIL_PASSWORD', ''); // Usually empty for local server
-define('MAIL_ENCRYPTION', ''); // Usually none for local server ('tls', 'ssl', or '')
+define('MAIL_HOST', 'mail.saischoolchats.co.za'); // Your domain's mail server
+define('MAIL_PORT', 587); // Common secure SMTP port
+define('MAIL_USERNAME', 'contact@saischoolchats.co.za'); // Your email username
+define('MAIL_PASSWORD', ''); // Your email password - set this in cPanel
+define('MAIL_ENCRYPTION', 'tls'); // Use TLS encryption
 
 // Mail settings
-define('MAIL_FROM_EMAIL', 'noreply@saischoolchats.co.za');
+define('MAIL_FROM_EMAIL', 'contact@saischoolchats.co.za');
 define('MAIL_FROM_NAME', SITE_NAME);
 define('MAIL_REPLY_TO', ADMIN_EMAIL);
 
 // Mail debugging (set to 0 in production)
-define('MAIL_DEBUG', 1); // 0 = off, 1 = client messages, 2 = client and server messages
+define('MAIL_DEBUG', 2); // Temporarily set to 2 for debugging
 
 // Alternative configuration for different local setups
 // Uncomment and modify as needed based on your server configuration
