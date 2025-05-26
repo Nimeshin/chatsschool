@@ -31,45 +31,39 @@ class MailService
     {
         try {
             // Server settings
+            $this->mailer->SMTPDebug = $this->config['debug'];
             $this->mailer->isSMTP();
             $this->mailer->Host = $this->config['host'];
             $this->mailer->Port = $this->config['port'];
             
             // Authentication
-            if (!empty($this->config['username']) && !empty($this->config['password'])) {
-                $this->mailer->SMTPAuth = true;
-                $this->mailer->Username = $this->config['username'];
-                $this->mailer->Password = $this->config['password'];
-            } else {
-                $this->mailer->SMTPAuth = false;
-            }
+            $this->mailer->SMTPAuth = true; // Always use authentication for cPanel
+            $this->mailer->Username = $this->config['username'];
+            $this->mailer->Password = $this->config['password'];
             
             // Encryption
-            if (!empty($this->config['encryption'])) {
-                if ($this->config['encryption'] === 'tls') {
-                    $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-                } elseif ($this->config['encryption'] === 'ssl') {
-                    $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-                }
+            if ($this->config['encryption'] === 'ssl') {
+                $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+            } elseif ($this->config['encryption'] === 'tls') {
+                $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             }
             
             // Debug settings
-            $this->mailer->SMTPDebug = $this->config['debug'];
             $this->mailer->Debugoutput = function($str, $level) {
-                error_log("PHPMailer Debug Level $level: $str");
+                error_log("PHPMailer Debug ($level): $str");
             };
             
             // Additional settings
-            $this->mailer->isHTML(false); // Default to plain text
             $this->mailer->CharSet = 'UTF-8';
             $this->mailer->Encoding = 'base64';
+            $this->mailer->Timeout = 60; // Increase timeout for slower connections
             
             // Set default from address
             $this->mailer->setFrom($this->config['from_email'], $this->config['from_name']);
             
         } catch (Exception $e) {
             error_log('PHPMailer Configuration Error: ' . $e->getMessage());
-            throw new \RuntimeException('Mail service configuration failed');
+            throw new \RuntimeException('Mail service configuration failed: ' . $e->getMessage());
         }
     }
 
@@ -107,12 +101,25 @@ class MailService
             $body .= "IP Address: " . ($data['ip'] ?? 'unknown');
             
             $this->mailer->Body = $body;
+            $this->mailer->isHTML(false); // Send as plain text
             
-            return $this->mailer->send();
+            $result = $this->mailer->send();
+            
+            if ($result) {
+                // Try to send auto-reply
+                try {
+                    $this->sendAutoReply($data);
+                } catch (Exception $e) {
+                    error_log('Auto-reply failed: ' . $e->getMessage());
+                    // Don't throw the error as the main email was sent successfully
+                }
+            }
+            
+            return $result;
             
         } catch (Exception $e) {
             error_log('PHPMailer Send Error: ' . $e->getMessage());
-            throw $e;
+            throw new \RuntimeException('Failed to send email: ' . $e->getMessage());
         }
     }
 
@@ -148,6 +155,7 @@ class MailService
             $body .= "This is an automated response. Please do not reply to this email.";
             
             $this->mailer->Body = $body;
+            $this->mailer->isHTML(false); // Send as plain text
             
             return $this->mailer->send();
             
@@ -173,22 +181,25 @@ class MailService
 
         try {
             // Test SMTP connection
-            $this->mailer->smtpConnect();
-            $results['smtp_connect'] = true;
-            $this->mailer->smtpClose();
-            
-            // Test sending if email provided
-            if (!empty($testEmail)) {
-                $this->mailer->clearAddresses();
-                $this->mailer->addAddress($testEmail);
-                $this->mailer->Subject = 'Test Email from ' . $this->config['from_name'];
-                $this->mailer->Body = 'This is a test email to verify PHPMailer configuration.';
+            if ($this->mailer->smtpConnect()) {
+                $results['smtp_connect'] = true;
                 
-                $results['send_test'] = $this->mailer->send();
+                // Test sending if email provided
+                if (!empty($testEmail)) {
+                    $this->mailer->clearAddresses();
+                    $this->mailer->addAddress($testEmail);
+                    $this->mailer->Subject = 'Test Email from ' . $this->config['from_name'];
+                    $this->mailer->Body = 'This is a test email to verify PHPMailer configuration.';
+                    $this->mailer->isHTML(false);
+                    
+                    $results['send_test'] = $this->mailer->send();
+                }
+                
+                $this->mailer->smtpClose();
             }
-            
         } catch (Exception $e) {
             $results['errors'][] = $e->getMessage();
+            error_log('Mail Configuration Test Error: ' . $e->getMessage());
         }
 
         return $results;

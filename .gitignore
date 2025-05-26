@@ -1,21 +1,20 @@
-# Configuration files with sensitive data
-includes/mail_config.php
-
-# Log files
-*.log
-contact_submissions.log
+# Dependencies
+/vendor/
+/node_modules/
 
 # Environment files
 .env
 .env.*
 !.env.example
 
+# Configuration files with sensitive data
+includes/mail_config.php
+
 # IDE and editor files
 .idea/
 .vscode/
-*.swp
-*.swo
-*~
+*.sublime-project
+*.sublime-workspace
 
 # OS generated files
 .DS_Store
@@ -26,24 +25,28 @@ contact_submissions.log
 ehthumbs.db
 Thumbs.db
 
-# Temporary files
+# Logs and databases
+*.log
+*.sql
+*.sqlite
+
+# Cache and temporary files
+*.cache
 *.tmp
 *.temp
+/cache/
+/tmp/
 
 # Backup files
 *.bak
 *.backup
-
-# Cache files
-cache/
-tmp/
+*~
 
 # Upload directories (if they contain user uploads)
 uploads/
 user_uploads/
 
 # Composer dependencies
-/vendor/
 composer.phar
 
 # Test files (remove after testing)

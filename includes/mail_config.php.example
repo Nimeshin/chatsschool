@@ -7,17 +7,17 @@ declare(strict_types=1);
  * @package SathyaSaiSchool
  */
 
-// Mail server configuration
-define('MAIL_HOST', 'mail.saischoolchats.co.za'); // Your domain's mail server
-define('MAIL_PORT', 587); // Common secure SMTP port
-define('MAIL_USERNAME', 'contact@saischoolchats.co.za'); // Your email username
-define('MAIL_PASSWORD', ''); // Your email password - set this in production
-define('MAIL_ENCRYPTION', 'tls'); // Use TLS encryption
+// Mail server configuration for cPanel
+define('MAIL_HOST', 'mail.yourdomain.com'); // Your cPanel mail server
+define('MAIL_PORT', 465); // SSL port for secure email
+define('MAIL_USERNAME', 'your-email@yourdomain.com'); // Your email username
+define('MAIL_PASSWORD', 'your-password'); // Your email password
+define('MAIL_ENCRYPTION', 'ssl'); // Use SSL encryption for cPanel
 
 // Mail settings
-define('MAIL_FROM_EMAIL', 'contact@saischoolchats.co.za');
-define('MAIL_FROM_NAME', SITE_NAME);
-define('MAIL_REPLY_TO', ADMIN_EMAIL);
+define('MAIL_FROM_EMAIL', 'your-email@yourdomain.com');
+define('MAIL_FROM_NAME', 'Your Site Name');
+define('MAIL_REPLY_TO', 'your-email@yourdomain.com');
 
 // Mail debugging (set to 0 in production)
 define('MAIL_DEBUG', 0); // Debug output disabled in production
