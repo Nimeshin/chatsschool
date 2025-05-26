@@ -18,30 +18,17 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_URI} (.+)/$
 RewriteRule ^(.+)/$ /$1 [R=301,L]
 
-# Allow direct access to certain directories/files
-RewriteCond %{REQUEST_URI} !^/assets/
-RewriteCond %{REQUEST_URI} !^/error/
-RewriteCond %{REQUEST_URI} !^/includes/
-RewriteCond %{REQUEST_URI} !\.(css|js|jpg|jpeg|png|gif|ico|pdf|svg|woff|woff2|ttf|eot|xml|txt)$
+# Allow access to assets and required directories
+RewriteCond %{REQUEST_URI} ^/assets/ [OR]
+RewriteCond %{REQUEST_URI} ^/error/ [OR]
+RewriteCond %{REQUEST_URI} ^/includes/ [OR]
+RewriteCond %{REQUEST_URI} \.(css|js|jpg|jpeg|png|gif|ico|pdf|svg|woff|woff2|ttf|eot|xml|txt)$
+RewriteRule ^ - [L]
 
 # Clean URLs - Remove PHP extension
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME}.php -f
 RewriteRule ^([^\.]+)$ $1.php [NC,L]
-
-# If the file doesn't exist, check for a directory with the same name
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_URI} !\.php$
-RewriteRule ^(.*)$ $1.php [L]
-
-# Handle index.php requests
-RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /index\.php\ HTTP/
-RewriteRule ^index\.php$ / [R=301,L]
-
-# Redirect common variations to canonical URLs
-RewriteRule ^home/?$ / [R=301,L]
-RewriteRule ^index/?$ / [R=301,L]
 
 # Default index page
 DirectoryIndex index.php index.html
@@ -52,7 +39,7 @@ php_value post_max_size 64M
 php_value max_execution_time 300
 php_value max_input_time 300
 
-# Basic error documents
+# Error documents
 ErrorDocument 404 /error/404.php
 ErrorDocument 500 /error/500.php
 ErrorDocument 403 /error/403.php
@@ -60,28 +47,54 @@ ErrorDocument 403 /error/403.php
 # Prevent directory listing
 Options -Indexes
 
-# Basic security headers
-Header set X-Content-Type-Options "nosniff"
-Header set X-Frame-Options "SAMEORIGIN"
+# Security headers
+<IfModule mod_headers.c>
+    Header set X-XSS-Protection "1; mode=block"
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    
+    # Cache Control
+    <FilesMatch "\.(html|php)$">
+        Header set Cache-Control "max-age=0, private, no-cache, no-store, must-revalidate"
+    </FilesMatch>
+    
+    <FilesMatch "\.(css|js|jpg|jpeg|png|gif|ico|svg|woff|woff2|ttf|eot)$">
+        Header set Cache-Control "max-age=31536000, public"
+    </FilesMatch>
+</IfModule>
 
-# MIME types
-AddType application/vnd.ms-fontobject .eot
-AddType application/x-font-ttf .ttf
-AddType application/x-font-opentype .otf
-AddType application/x-font-woff .woff
-AddType application/x-font-woff2 .woff2
-AddType image/svg+xml .svg
-AddType application/xml .xml
-AddType text/plain .txt
-AddType application/json .json
-AddType text/css .css
-AddType text/javascript .js
+# Enable GZIP compression
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript
+    AddOutputFilterByType DEFLATE application/javascript application/x-javascript application/json
+    AddOutputFilterByType DEFLATE application/xml application/xhtml+xml
+    AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
 
-# Prevent access to specific files and directories
-<FilesMatch "^(\.htaccess|\.git|\.env|config\.php|composer\.(json|lock)|package\.json)">
+# Protect sensitive files
+<FilesMatch "^(\.htaccess|\.git|\.env|config\.php|composer\.(json|lock)|package\.json)$">
     Order Allow,Deny
     Deny from all
 </FilesMatch>
+
+# Set proper MIME types
+AddType application/javascript .js
+AddType text/css .css
+AddType application/x-font-ttf .ttf
+AddType application/x-font-woff .woff
+AddType application/x-font-woff2 .woff2
+AddType image/svg+xml .svg
+
+# Redirect common variations to canonical URLs
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /index\.php\ HTTP/
+RewriteRule ^index\.php$ / [R=301,L]
+
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /home\ HTTP/
+RewriteRule ^home/?$ / [R=301,L]
+
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /index\ HTTP/
+RewriteRule ^index/?$ / [R=301,L]
 
 # Block access to sensitive directories
 <IfModule mod_rewrite.c>
@@ -108,52 +121,8 @@ AddType text/javascript .js
     ExpiresDefault "access plus 2 days"
 </IfModule>
 
-# Enable GZIP compression
-<IfModule mod_deflate.c>
-    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript
-    AddOutputFilterByType DEFLATE application/javascript application/x-javascript application/json
-    AddOutputFilterByType DEFLATE application/xml application/xhtml+xml
-    AddOutputFilterByType DEFLATE image/svg+xml
-</IfModule>
-
-# Security headers
-<IfModule mod_headers.c>
-    Header set X-XSS-Protection "1; mode=block"
-    Header set X-Content-Type-Options "nosniff"
-    Header set X-Frame-Options "SAMEORIGIN"
-    Header set Referrer-Policy "strict-origin-when-cross-origin"
-    Header set Permissions-Policy "geolocation=(), microphone=(), camera=()"
-    
-    # Add Cache-Control for HTML files
-    <FilesMatch "\.(html|php)$">
-        Header set Cache-Control "max-age=0, private, no-cache, no-store, must-revalidate"
-    </FilesMatch>
-    
-    # Cache static assets
-    <FilesMatch "\.(css|js|jpg|jpeg|png|gif|ico|svg|woff|woff2|ttf|eot)$">
-        Header set Cache-Control "max-age=31536000, public"
-    </FilesMatch>
-    
-    # Cache XML and text files
-    <FilesMatch "\.(xml|txt)$">
-        Header set Cache-Control "max-age=604800, public"
-    </FilesMatch>
-
-    # Allow AJAX requests from same origin
-    Header set Access-Control-Allow-Origin "https://www.saischoolchats.co.za"
-    Header set Access-Control-Allow-Methods "POST, GET, OPTIONS"
-    Header set Access-Control-Allow-Headers "Content-Type"
-    Header set Access-Control-Allow-Credentials "true"
-</IfModule>
-
 # Enable PHP execution
 AddHandler application/x-httpd-php .php
-
-# Protect sensitive files
-<FilesMatch "^(\.htaccess|\.htpasswd|\.git|\.env|composer\.(json|lock))$">
-    Order Allow,Deny
-    Deny from all
-</FilesMatch>
 
 # Protect includes directory
 <IfModule mod_rewrite.c>
