@@ -1,20 +1,29 @@
+# Configuration files with sensitive data
+includes/mail_config.php
+
 # Log files
 *.log
 contact_submissions.log
 
 # Environment files
 .env
-.env.local
-.env.production
+.env.*
+!.env.example
 
-# IDE files
-.vscode/
+# IDE and editor files
 .idea/
+.vscode/
 *.swp
 *.swo
+*~
 
-# OS files
+# OS generated files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 
 # Temporary files
@@ -33,9 +42,9 @@ tmp/
 uploads/
 user_uploads/
 
-# Composer
-vendor/
-composer.lock
+# Composer dependencies
+/vendor/
+composer.phar
 
 # Test files (remove after testing)
 test-*.php 
